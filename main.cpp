@@ -5,10 +5,11 @@
 
 int main(int /*argc*/, char **/*argv[]*/)
 {
-    la_objects::LAMatrix<double> A(2, 3);
-    la_objects::LAMatrix<double> B(3, 2);
+    la_objects::LAMatrix<double> A(2, 2);
+    la_objects::LAMatrix<double> B(2, 2);
 
     la_objects::LAMatrix<double> C;
+    la_objects::LAMatrix<double> D(2, 1);
 
     for (unsigned int r = 0; r < A.n_rows(); r++)
     {
@@ -26,17 +27,21 @@ int main(int /*argc*/, char **/*argv[]*/)
         }
     }
 
-    std::cout << std::setprecision(20) << std::scientific;
+    std::cout << std::setprecision(3);// << std::scientific;
     std::cout << "A:" << std::endl << A << std::endl;
     std::cout << "B:" << std::endl << B << std::endl;
 
     A *= 2.0;
 
-    std::cout << "A:" << std::endl; A.print(std::cout); std::cout << std::endl;
+    std::cout << "2*A:" << std::endl; A.print(std::cout); std::cout << std::endl;
 
     C = A * B;
 
-    std::cout << "A*B:" << std::endl << C << std::endl;
+    std::cout << "2*A*B:" << std::endl << C << std::endl;
+
+    la_operations::evd(A, D);
+
+    std::cout << A;
 
     return 0;
 }

@@ -48,6 +48,16 @@ void contract(const la_objects::LAMatrix<T>& _larg, const la_objects::LAMatrix<T
                        _dest.leading_dim());
 }
 
+template <typename T>
+void evd(const la_objects::LAMatrix<T>& _arg, la_objects::LAMatrix<T>& _out)
+{
+    blas_wrapper::evd(_arg.n_rows(),
+                      _arg.n_cols(),
+                      _arg.get_data_ptr(),
+                      _out.get_data_ptr(),
+                      _arg.leading_dim());
+}
+
 } // END NAMESPACE la_operations
 
 #endif // LA_OPERATIONS

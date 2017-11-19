@@ -16,6 +16,9 @@ namespace la_operations
 template <typename Type>
 void contract(const la_objects::LAMatrix<Type>& _larg, const la_objects::LAMatrix<Type>& _rarg, la_objects::LAMatrix<Type>& _dest);
 
+template <typename Type>
+void evd(const la_objects::LAMatrix<Type>& _arg, la_objects::LAMatrix<Type>& _out);
+
 } // END NAMESPACE la_operations
 
 namespace la_objects
@@ -54,11 +57,13 @@ public:
 
     template <typename Type>
     friend void la_operations::contract(const LAMatrix<Type>& _larg, const LAMatrix<Type>& _rarg, LAMatrix<Type>& _dest);
+
+    template <typename Type>
+    friend void la_operations::evd(const LAMatrix<Type>& _arg, LAMatrix<Type>& _out);
 };
 
 } // END NAMESPACE la_objects
 
 template <typename T>
 la_objects::LAMatrix<T> operator*(const la_objects::LAMatrix<T>& _larg, const la_objects::LAMatrix<T>& _rarg);
-
 #endif // LA_OBJECTS_H

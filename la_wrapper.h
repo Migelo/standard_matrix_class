@@ -3,6 +3,9 @@
 
 #include <gsl/gsl_cblas.h>
 //#include <cblas.h>
+#include <lapacke.h>
+//#include <clapack.h>
+//#include <cblas.h>
 
 #include <complex>
 
@@ -14,6 +17,7 @@ namespace blas_wrapper
 //! @param incx : Speicher Abstand zwischen Elemente in Vector x.
 //! @param y : Zielvektor (y= alpha*x+y).
 //! @param incy: Speicher Abstand zwischen Elemente in Vector y.
+
 
 static void
 copy(int n, const float *x, int incx, float *y, int incy)
@@ -144,7 +148,7 @@ static void gemv (char trans, int m, int n, std::complex<double> & alpha,
 //! @param C : Matrix C.
 //! @param ldc : leading dimension von C.
 static void gemm(char transa, char transb, int m, int n, int k, float alpha,
-                 const float * const A, int lda, const float * const B, int ldb,
+                 const float * A, int lda, const float * B, int ldb,
                  float beta, float * C, int ldc)
 {
     CBLAS_TRANSPOSE tr_a = ( ( (transa == 't') || (transa == 'T') ) ? CblasTrans : ( (transa == 'c') || (transa == 'C') ) ? CblasTrans : CblasNoTrans );
@@ -163,7 +167,7 @@ static void gemm(char transa, char transb, int m, int n, int k, float alpha,
 
 
 static void gemm(char transa, char transb, int m, int n, int k, double alpha,
-                 const double * const A, int lda, const double * const B, int ldb,
+                 const double * A, int lda, const double * B, int ldb,
                  double beta, double * C, int ldc)
 {
     CBLAS_TRANSPOSE tr_a = ( ( (transa == 't') || (transa == 'T') ) ? CblasTrans : ( (transa == 'c') || (transa == 'C') ) ? CblasTrans : CblasNoTrans );
@@ -175,7 +179,7 @@ static void gemm(char transa, char transb, int m, int n, int k, double alpha,
 }
 
 static void gemm(char transa, char transb, int m, int n, int k, const std::complex<float> alpha,
-                 const std::complex<float> * const A, int lda, const std::complex<float> * const B, int ldb,
+                 const std::complex<float> *  A, int lda, const std::complex<float> * B, int ldb,
                  const std::complex<float> beta, std::complex<float> * C, int ldc)
 {
     CBLAS_TRANSPOSE tr_a = ( ( (transa == 't') || (transa == 'T') ) ? CblasTrans : ( (transa == 'c') || (transa == 'C') ) ? CblasConjTrans : CblasNoTrans );
@@ -193,7 +197,7 @@ static void gemm(char transa, char transb, int m, int n, int k, const std::compl
 
 
 static void gemm(char transa, char transb, int m, int n, int k, const std::complex<double> alpha,
-                 const std::complex<double> * const A, int lda, const std::complex<double> * const B, int ldb,
+                 const std::complex<double> * A, int lda, const std::complex<double> * B, int ldb,
                  const std::complex<double> beta, std::complex<double> * C, int ldc)
 {
     CBLAS_TRANSPOSE tr_a = ( ( (transa == 't') || (transa == 'T') ) ? CblasTrans : ( (transa == 'c') || (transa == 'C') ) ? CblasConjTrans : CblasNoTrans );
@@ -209,6 +213,37 @@ static void gemm(char transa, char transb, int m, int n, int k, const std::compl
                 reinterpret_cast<double*>(C), ldc);
 }
 
+
+static void evd(int m, int n, const float * A, float * out, int lda)
+{
+    blas_wrapper::copy(m*n, A, 1, out, 1);
+
+    LAPACKE_ssyev(2, 'N', 'L', 2, out, lda, 0);
+}
+
+
+static void evd(int m, int n, const double * A, double * out, int lda)
+{
+    blas_wrapper::copy(m*n, A, 1, out, 1);
+
+    LAPACKE_dsyev(2, 'N', 'L', 2, out, lda, 0);
+}
+
+
+static void evd(int m, int n, const std::complex<float> * A, std::complex<float> * out, int lda)
+{
+    blas_wrapper::copy(m*n, A, 1, out, 1);
+
+    LAPACKE_cheev(2, 'N', 'L', 2, reinterpret_cast<lapack_complex_float*>(out), lda, 0);
+}
+
+
+static void evd(int m, int n, const std::complex<double> * A, std::complex<double> * out, int lda)
+{
+    blas_wrapper::copy(m*n, A, 1, out, 1);
+    LAPACKE_zheev(m, 'N', 'L', 2, reinterpret_cast<lapack_complex_double*>(out), lda, 0);
+
+}
 
 } // END NAMESPACE blas_wrapper
 

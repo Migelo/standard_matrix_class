@@ -20,8 +20,9 @@ CONFIG += c++11
 
 LIBS += -L/usr/lib -llapack
 LIBS += -L/usr/lib -lblas
-
+#LIBS += -framework Accelerate
 INCLUDEPATH += /opt/local/include
+#INCLUDEPATH += /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers/
 
 SOURCES += main.cpp \
     la_objects.cpp

@@ -22,7 +22,6 @@ void copy_data(const la_objects::LABaseObject<T>& _src, la_objects::LABaseObject
 
 template <typename Type>
 void scale(const Type& _value, la_objects::LABaseObject<Type>& _dest);
-
 } // END NAMESPACE la_operations
 
 namespace la_objects
