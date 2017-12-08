@@ -1,12 +1,10 @@
 #ifndef LA_WRAPPER
 #define LA_WRAPPER
 
-//#include <gsl/gsl_cblas.h>
+// #include <gsl/gsl_cblas.h>
 #include <cblas.h>
 #include <complex>
 #include <lapack_header.h>
-
-#include <complex>
 
 namespace blas_wrapper
 {
@@ -16,7 +14,6 @@ namespace blas_wrapper
 //! @param incx : Speicher Abstand zwischen Elemente in Vector x.
 //! @param y : Zielvektor (y= alpha*x+y).
 //! @param incy: Speicher Abstand zwischen Elemente in Vector y.
-
 
 static void
 copy(int n, const float *x, int incx, float *y, int incy)
@@ -147,7 +144,7 @@ static void gemv (char trans, int m, int n, std::complex<double> & alpha,
 //! @param C : Matrix C.
 //! @param ldc : leading dimension von C.
 static void gemm(char transa, char transb, int m, int n, int k, float alpha,
-                 const float * A, int lda, const float * B, int ldb,
+                 const float * const A, int lda, const float * const B, int ldb,
                  float beta, float * C, int ldc)
 {
     CBLAS_TRANSPOSE tr_a = ( ( (transa == 't') || (transa == 'T') ) ? CblasTrans : ( (transa == 'c') || (transa == 'C') ) ? CblasTrans : CblasNoTrans );
@@ -166,7 +163,7 @@ static void gemm(char transa, char transb, int m, int n, int k, float alpha,
 
 
 static void gemm(char transa, char transb, int m, int n, int k, double alpha,
-                 const double * A, int lda, const double * B, int ldb,
+                 const double * const A, int lda, const double * const B, int ldb,
                  double beta, double * C, int ldc)
 {
     CBLAS_TRANSPOSE tr_a = ( ( (transa == 't') || (transa == 'T') ) ? CblasTrans : ( (transa == 'c') || (transa == 'C') ) ? CblasTrans : CblasNoTrans );
@@ -178,7 +175,7 @@ static void gemm(char transa, char transb, int m, int n, int k, double alpha,
 }
 
 static void gemm(char transa, char transb, int m, int n, int k, const std::complex<float> alpha,
-                 const std::complex<float> *  A, int lda, const std::complex<float> * B, int ldb,
+                 const std::complex<float> * const A, int lda, const std::complex<float> * const B, int ldb,
                  const std::complex<float> beta, std::complex<float> * C, int ldc)
 {
     CBLAS_TRANSPOSE tr_a = ( ( (transa == 't') || (transa == 'T') ) ? CblasTrans : ( (transa == 'c') || (transa == 'C') ) ? CblasConjTrans : CblasNoTrans );
@@ -196,7 +193,7 @@ static void gemm(char transa, char transb, int m, int n, int k, const std::compl
 
 
 static void gemm(char transa, char transb, int m, int n, int k, const std::complex<double> alpha,
-                 const std::complex<double> * A, int lda, const std::complex<double> * B, int ldb,
+                 const std::complex<double> * const A, int lda, const std::complex<double> * const B, int ldb,
                  const std::complex<double> beta, std::complex<double> * C, int ldc)
 {
     CBLAS_TRANSPOSE tr_a = ( ( (transa == 't') || (transa == 'T') ) ? CblasTrans : ( (transa == 'c') || (transa == 'C') ) ? CblasConjTrans : CblasNoTrans );
@@ -211,63 +208,182 @@ static void gemm(char transa, char transb, int m, int n, int k, const std::compl
                 reinterpret_cast<const double*>(&beta),
                 reinterpret_cast<double*>(C), ldc);
 }
+
+
 } // END NAMESPACE blas_wrapper
 
 namespace lapack_wrapper
 {
 
-static void svd(char * JOBU, char * JOBVT, const LAPACK_INT * M, const LAPACK_INT * N, float * A, const LAPACK_INT * LDA, float * S, float * U, const LAPACK_INT * LDU, float * VT, const LAPACK_INT *  LDVT, float * WORK, LAPACK_INT * LWORK, LAPACK_INT * INFO)
+// @sect5{Lapack function wrappers}
+// @sect6{Wrapper: SVD lapack-wrapper}
+// Wraps the general matrix svd lapack function for the four types s, d, c and z.
+// Lapack doc: http://www.netlib.org/lapack/explore-html/d8/d49/sgesvd_8f.html
+inline static void gesvd(char * JOBU, char * JOBVT, const LAPACK_INT * M, const LAPACK_INT * N, float * A, const LAPACK_INT * LDA, float * S, float * U, const LAPACK_INT * LDU, float * VT, const LAPACK_INT * LDVT, float * WORK, const LAPACK_INT * LWORK, float * /*RWORK*/, LAPACK_INT * INFO)
 {
     sgesvd_(JOBU, JOBVT, M, N, A, LDA, S, U, LDU, VT, LDVT, WORK, LWORK, INFO);
 }
 
-
-static void svd(char * JOBU, char * JOBVT, const LAPACK_INT * M, const LAPACK_INT * N, double * A, const LAPACK_INT * LDA, double * S, double * U, const LAPACK_INT * LDU, double * VT, const LAPACK_INT *  LDVT, double * WORK, LAPACK_INT * LWORK, LAPACK_INT * INFO)
+inline static void gesvd(char * JOBU, char * JOBVT, const LAPACK_INT * M, const LAPACK_INT * N, double * A, const LAPACK_INT * LDA, double * S, double * U, const LAPACK_INT * LDU, double * VT, const LAPACK_INT * LDVT, double * WORK, const LAPACK_INT * LWORK, double * /*RWORK*/, LAPACK_INT * INFO)
 {
     dgesvd_(JOBU, JOBVT, M, N, A, LDA, S, U, LDU, VT, LDVT, WORK, LWORK, INFO);
 }
 
+inline static void gesvd(char * JOBU, char * JOBVT, const LAPACK_INT * M, const LAPACK_INT * N, std::complex<float> * A, const LAPACK_INT * LDA, float * S, std::complex<float> * U, const LAPACK_INT  * LDU, std::complex<float> * VT, const LAPACK_INT * LDVT, std::complex<float> * WORK, const LAPACK_INT * LWORK, float * RWORK, LAPACK_INT * INFO)
+{
+    cgesvd_(JOBU, JOBVT, M, N, A, LDA, S, U, LDU, VT, LDVT, WORK, LWORK, RWORK, INFO);
+}
 
+inline static void gesvd(char * JOBU, char * JOBVT, const LAPACK_INT * M, const LAPACK_INT * N, std::complex<double> * A, const LAPACK_INT * LDA, double * S, std::complex<double> * U, const LAPACK_INT * LDU, std::complex<double> * VT, const LAPACK_INT * LDVT, std::complex<double> * WORK, const LAPACK_INT * LWORK, double * RWORK, LAPACK_INT * INFO)
+{
+    zgesvd_(JOBU, JOBVT, M, N, A, LDA, S, U, LDU, VT, LDVT, WORK, LWORK, RWORK, INFO);
+}
 
+// @sect6{Wrapper: SVD divide and conquer lapack-wrapper}
+// Wraps the general matrix sdd lapack function for the four types s, d, c and z.
+// Lapack doc: http://www.netlib.org/lapack/explore-html/d1/d7e/group__double_g_esing_ga76f797b6a9e278ad7b21aae2b4a55d76.html#ga76f797b6a9e278ad7b21aae2b4a55d76
+inline static void gesdd(char * JOBZ, const LAPACK_INT * M, const LAPACK_INT * N, float * A, const LAPACK_INT * LDA, float * S, float * U, const LAPACK_INT * LDU, float * VT, const LAPACK_INT * LDVT, float * WORK, const LAPACK_INT * LWORK, float * /*RWORK*/, LAPACK_INT * IWORK, LAPACK_INT * INFO)
+{
+    return sgesdd_(JOBZ, M, N, A, LDA, S, U, LDU, VT, LDVT, WORK, LWORK, IWORK, INFO);
+}
+inline static void gesdd(char * JOBZ, const LAPACK_INT * M, const LAPACK_INT * N, double * A, const LAPACK_INT * LDA, double * S, double * U, const LAPACK_INT * LDU, double * VT, const LAPACK_INT * LDVT, double * WORK, const LAPACK_INT * LWORK, double * /*RWORK*/, LAPACK_INT * IWORK, LAPACK_INT * INFO)
+{
+    return dgesdd_(JOBZ, M, N, A, LDA, S, U, LDU, VT, LDVT, WORK, LWORK, IWORK, INFO);
+}
+inline static void gesdd(char * JOBZ, const LAPACK_INT * M, const LAPACK_INT * N, std::complex<float> * A, const LAPACK_INT * LDA, float * S, std::complex<float> * U, const LAPACK_INT * LDU, std::complex<float> * VT, const LAPACK_INT * LDVT, std::complex<float> * WORK, const LAPACK_INT * LWORK, float * RWORK, LAPACK_INT * IWORK, LAPACK_INT * INFO)
+{
+    return cgesdd_(JOBZ, M, N, A, LDA, S, U, LDU, VT, LDVT, WORK, LWORK, RWORK, IWORK, INFO);
+}
+inline static void gesdd(char * JOBZ, const LAPACK_INT * M, const LAPACK_INT * N, std::complex<double> * A, const LAPACK_INT * LDA, double * S, std::complex<double> * U, const LAPACK_INT * LDU, std::complex<double> * VT, const LAPACK_INT * LDVT, std::complex<double> * WORK, const LAPACK_INT * LWORK, double * RWORK, LAPACK_INT * IWORK, LAPACK_INT * INFO)
+{
+    return zgesdd_(JOBZ, M, N, A, LDA, S, U, LDU, VT, LDVT, WORK, LWORK, RWORK, IWORK, INFO);
+}
 
-//static void kronicker_product(double &_larg, double &_rarg, double &_out)
-//{
-//    _out.resize(_larg.n_rows() * _rarg.n_rows(), _larg.n_cols() * _rarg.n_cols());
-//    la_objects::LAMatrix<double> WORK(_rarg.n_rows(), _rarg.n_cols());
+// @sect6{Wrapper: LUD lapack-wrapper}
+// Wraps the general matrix LU decomposition lapack function for the four types s, d, c and z.
+// Lapack doc: http://www.netlib.org/lapack/explore-html/de/de2/sgetrf_8f.html
+inline static void getrf(const LAPACK_INT * M, const LAPACK_INT * N, float * A, const LAPACK_INT * LDA, LAPACK_INT * IPIV, LAPACK_INT * INFO)
+{
+    sgetrf_(M, N, A, LDA, IPIV, INFO);
+}
+inline static void getrf(const LAPACK_INT * M, const LAPACK_INT * N, double * A, const LAPACK_INT * LDA, LAPACK_INT * IPIV, LAPACK_INT * INFO)
+{
+    dgetrf_(M, N, A, LDA, IPIV, INFO);
+}
+inline static void getrf(const LAPACK_INT * M, const LAPACK_INT * N, std::complex<float> * A, const LAPACK_INT * LDA, LAPACK_INT * IPIV, LAPACK_INT * INFO)
+{
+    cgetrf_(M, N, A, LDA, IPIV, INFO);
+}
+inline static void getrf(const LAPACK_INT * M, const LAPACK_INT * N, std::complex<double> * A, const LAPACK_INT * LDA, LAPACK_INT * IPIV, LAPACK_INT * INFO)
+{
+    zgetrf_(M, N, A, LDA, IPIV, INFO);
+}
 
-//    for (unsigned int r = 0; r < _out.n_rows(); r++)
-//    {
-//        for (unsigned int c = 0; c < _out.n_cols(); c++)
-//        {
-//            scale(_larg(r, c), WORK);
-//            for (unsigned int i; i < WORK.n_rows(); i++)
-//            {
-//                for (unsigned j; j < WORK.n_cols(); j++)
-//                {
-//                    _out(r * _larg.n_rows() + i, c * _larg.n_cols() + j) = WORK(i, j);
-//                }
-//            }
+// @sect6{Wrapper: LU-Inverse lapack-wrapper}
+// Wraps the general matrix inversion lapack function for the two types s, d.
+ // Lapack doc: http://www.netlib.org/lapack/explore-html/de/de2/sgetri_8f.html
+inline static void getri (const LAPACK_INT * N, float * A, const LAPACK_INT * LDA, const LAPACK_INT * IPIV, float * WORK, const LAPACK_INT * LWORK, LAPACK_INT * INFO)
+{
+    sgetri_(N, A, LDA, IPIV, WORK, LWORK, INFO);
+}
+inline static void getri (const LAPACK_INT * N, double * A, const LAPACK_INT * LDA, const LAPACK_INT * IPIV, double * WORK, const LAPACK_INT * LWORK, LAPACK_INT * INFO)
+{
+    dgetri_(N, A, LDA, IPIV, WORK, LWORK, INFO);
+}
 
+// @sect6{Wrapper: QRF lapack-wrapper}
+// Wraps the general matrix QR factorization lapack function for the four types s, d, c and z.
+// Lapack doc: http://www.netlib.org/lapack/explore-html/df/d97/sgeqrf_8f.html
+inline static void geqrf(const LAPACK_INT * M, const LAPACK_INT * N, float * A, const LAPACK_INT * LDA, float * TAU, float * WORK, const LAPACK_INT * LWORK, LAPACK_INT * INFO)
+{
+    sgeqrf_(M, N, A, LDA, TAU, WORK, LWORK, INFO);
+}
+inline static void geqrf(const LAPACK_INT * M, const LAPACK_INT * N, double * A, const LAPACK_INT * LDA, double * TAU, double * WORK, const LAPACK_INT * LWORK, LAPACK_INT * INFO)
+{
+    dgeqrf_(M, N, A, LDA, TAU, WORK, LWORK, INFO);
+}
+inline static void geqrf(const LAPACK_INT * M, const LAPACK_INT * N, std::complex<float> * A, const LAPACK_INT * LDA, std::complex<float> * TAU, std::complex<float> * WORK, const LAPACK_INT * LWORK, LAPACK_INT * INFO)
+{
+    cgeqrf_(M, N, A, LDA, TAU, WORK, LWORK, INFO);
+}
+inline static void geqrf(const LAPACK_INT * M, const LAPACK_INT * N, std::complex<double> * A, const LAPACK_INT * LDA, std::complex<double> * TAU, std::complex<double> * WORK, const LAPACK_INT * LWORK, LAPACK_INT * INFO)
+{
+    zgeqrf_(M, N, A, LDA, TAU, WORK, LWORK, INFO);
+}
 
-//        }
-//    }
-//}
+// @sect6{Wrapper: MQR lapack-wrapper}
+// Wraps the lapack function of the product of elementary reflectors from the QR factorization for the four types s, d, c and z.
+// Lapack doc: http://www.netlib.org/lapack/explore-html/d0/d98/sormqr_8f.html
+inline static void xxmqr(char * SIDE, char * TRANS, const LAPACK_INT * M, const LAPACK_INT * N, const LAPACK_INT * K, float * A, const LAPACK_INT * LDA, float * TAU, float * C, const LAPACK_INT * LDC, float * WORK, const LAPACK_INT * LWORK, LAPACK_INT * INFO)
+{
+    sormqr_(SIDE, TRANS, M, N, K, A, LDA, TAU, C, LDC, WORK, LWORK, INFO);
+}
+inline static void xxmqr(char * SIDE, char * TRANS, const LAPACK_INT * M, const LAPACK_INT * N, const LAPACK_INT * K, double * A, const LAPACK_INT * LDA, double * TAU, double * C, const LAPACK_INT * LDC, double * WORK, const LAPACK_INT * LWORK, LAPACK_INT * INFO)
+{
+    dormqr_(SIDE, TRANS, M, N, K, A, LDA, TAU, C, LDC, WORK, LWORK, INFO);
+}
+inline static void xxmqr(char * SIDE, char * TRANS, const LAPACK_INT * M, const LAPACK_INT * N, const LAPACK_INT * K, std::complex<float> * A, const LAPACK_INT * LDA, std::complex<float> * TAU, std::complex<float> * C, const LAPACK_INT * LDC, std::complex<float> * WORK, const LAPACK_INT * LWORK, LAPACK_INT * INFO)
+{
+    cunmqr_(SIDE, TRANS, M, N, K, A, LDA, TAU, C, LDC, WORK, LWORK, INFO);
+}
+inline static void xxmqr(char * SIDE, char * TRANS, const LAPACK_INT * M, const LAPACK_INT * N, const LAPACK_INT * K, std::complex<double> * A, const LAPACK_INT * LDA, std::complex<double> * TAU, std::complex<double> * C, const LAPACK_INT * LDC, std::complex<double> * WORK, const LAPACK_INT * LWORK, LAPACK_INT * INFO)
+{
+    zunmqr_(SIDE, TRANS, M, N, K, A, LDA, TAU, C, LDC, WORK, LWORK, INFO);
+}
 
+// @sect6{Wrapper: EV lapack-wrapper}
+// Wraps the lapack function for computing the eigenvalues and, optionally, the left and/or right eigenvectors for the four types s, d, c and z.
+// Lapack doc: http://www.netlib.org/lapack/explore-html/d1/d74/group__eigen_s_y.html and http://www.netlib.org/lapack/explore-html/df/db2/cheev_8f.html
+inline static void xxev(char * JOBZ, char * UPLO, const LAPACK_INT * N, float * A, const LAPACK_INT * LDA, float * W, float * WORK, const LAPACK_INT * LWORK, float * /*RWORK*/, LAPACK_INT * INFO)
+{
+    return ssyev_(JOBZ, UPLO, N, A, LDA, W, WORK, LWORK, INFO);
+}
+inline static void xxev(char * JOBZ, char * UPLO, const LAPACK_INT * N, double * A, const LAPACK_INT * LDA, double * W, double * WORK, const LAPACK_INT * LWORK, double * /*RWORK*/, LAPACK_INT * INFO)
+{
+    return dsyev_(JOBZ, UPLO, N, A, LDA, W, WORK, LWORK, INFO);
+}
+inline static void xxev(char * JOBZ, char * UPLO, const LAPACK_INT * N, std::complex<float> * A, const LAPACK_INT * LDA, float * W, std::complex<float> * WORK, const LAPACK_INT * LWORK, float * RWORK, LAPACK_INT * INFO)
+{
+    return cheev_(JOBZ, UPLO, N, A, LDA, W, WORK, LWORK, RWORK, INFO);
+}
+inline static void xxev(char * JOBZ, char * UPLO, const LAPACK_INT * N, std::complex<double> * A, const LAPACK_INT * LDA, double * W, std::complex<double> * WORK, const LAPACK_INT * LWORK, double * RWORK, LAPACK_INT * INFO)
+{
+    return zheev_(JOBZ, UPLO, N, A, LDA, W, WORK, LWORK, RWORK, INFO);
+}
 
-//static void evd(int m, int n, const std::complex<float> * A, std::complex<float> * out, int lda)
-//{
-//    blas_wrapper::copy(m*n, A, 1, out, 1);
-//    LAPACKE_cheev(2, 'N', 'L', 2, reinterpret_cast<lapack_complex_float*>(out), lda, 0);
-//}
+// @sect6{Wrapper: EV lapack-wrapper}
+// Wraps the lapack function for computing the eigenvalues and, optionally, the left and/or right eigenvectors for the two real types s and d.
+// Lapack doc: http://www.netlib.org/lapack/explore-html/d1/d74/group__eigen_s_y.html and http://www.netlib.org/lapack/explore-html/df/db2/cheev_8f.html
+inline static void xtev(char * JOBZ, const LAPACK_INT * N, float * D, float * E, float * Z, const LAPACK_INT * LDZ, float * WORK, LAPACK_INT * INFO)
+{
+    return sstev_(JOBZ, N, D, E, Z, LDZ, WORK, INFO);
+}
+inline static void xtev(char * JOBZ, const LAPACK_INT * N, double * D, double * E, double * Z, const LAPACK_INT * LDZ, double * WORK, LAPACK_INT * INFO)
+{
+    dstev_(JOBZ, N, D, E, Z, LDZ, WORK, INFO);
+}
 
+// @sect6{Wrapper: Matrix norm lapack-wrapper}
+// Wraps the lapack function for computing the eigenvalues and, optionally, the left and/or right eigenvectors for the two real types s and d.
+// Lapack doc: http://www.netlib.org/lapack/explore-html/d1/d74/group__eigen_s_y.html and http://www.netlib.org/lapack/explore-html/df/db2/cheev_8f.html
+inline static float lange(char * NORM, const LAPACK_INT * M, const LAPACK_INT * N, const float * A, const LAPACK_INT * LDA, float * WORK)
+{
+    return slange_( NORM, M, N, A, LDA, WORK );
+}
+inline static double lange(char * NORM, const LAPACK_INT * M, const LAPACK_INT * N, const double * A, const LAPACK_INT * LDA, double * WORK)
+{
+    return dlange_( NORM, M, N, A, LDA, WORK );
+}
+inline static float lange(char * NORM, const LAPACK_INT * M, const LAPACK_INT * N, const std::complex<float> * A, const LAPACK_INT * LDA, float * WORK)
+{
+    return clange_( NORM, M, N, A, LDA, WORK );
+}
+inline static double lange(char * NORM, const LAPACK_INT * M, const LAPACK_INT * N, const std::complex<double> * A, const LAPACK_INT * LDA, double * WORK)
+{
+    return zlange_( NORM, M, N, A, LDA, WORK );
+}
 
-//static void evd(int m, int n, const std::complex<double> * A, std::complex<double> * out, int lda)
-//{
-//    blas_wrapper::copy(m*n, A, 1, out, 1);
-//    LAPACKE_zheev(m, 'N', 'L', 2, reinterpret_cast<lapack_complex_double*>(out), lda, 0);
-//}
-
-} // END NAMESPACE blas_wrapper
+} // END NAMESPACE LAPACK_WRAPPER
 
 #endif // LA_WRAPPER
 

@@ -5,13 +5,44 @@
 #include <iostream>
 #include <stdexcept>
 #include <vector>
-#include <la_wrapper.h>
 #include <complex>
 
 namespace la_objects
 {
 
 template <typename T> class LABaseObject;
+
+/// we define template structure which can be used to determine real type underlying complex data types if necessary
+template <typename T>
+struct NumberTypeTrait{};
+
+/// specialize for real types
+template <>
+struct NumberTypeTrait<float>
+{
+    typedef float NumberType;
+    typedef float RealType;
+};
+template <>
+struct NumberTypeTrait<double>
+{
+    typedef double NumberType;
+    typedef double RealType;
+};
+
+/// specialize for complex types
+template <>
+struct NumberTypeTrait<std::complex<float>>
+{
+    typedef std::complex<float> NumberType;
+    typedef float RealType;
+};
+template <>
+struct NumberTypeTrait<std::complex<double>>
+{
+    typedef std::complex<double> NumberType;
+    typedef double RealType;
+};
 
 } // END NAMESPACE la_objects
 
@@ -23,6 +54,34 @@ void copy_data(const la_objects::LABaseObject<T>& _src, la_objects::LABaseObject
 
 template <typename Type>
 void scale(const Type& _value, la_objects::LABaseObject<Type>& _dest);
+
+template <typename T>
+class Expression
+{
+public:
+    typedef T Type;
+
+    const T &  operator~ () const
+    {
+        return static_cast<const T&>(*this);
+    }
+};
+
+/// forward declaration for apply functions
+template<typename E, typename X, typename T>
+static void apply(E, const Expression<X> &);
+
+template <typename LType, typename RType>
+struct BinaryExpression: public Expression<BinaryExpression<LType, RType>>
+{
+    const LType& larg;
+    const RType& rarg;
+
+    BinaryExpression(const LType& _larg, const RType& _rarg)
+        : larg(_larg), rarg(_rarg)
+    {}
+};
+
 } // END NAMESPACE la_operations
 
 namespace la_objects
@@ -32,7 +91,7 @@ namespace la_objects
 /// note that we are wrapping cblas routines which internally uses col-major format so we do the same to
 /// if however you want to use this class for other linear algebra packages you may rewrite here the basic access methods to the requiered data format
 template <typename T>
-class LABaseObject
+class LABaseObject: public la_operations::Expression<LABaseObject<T>>
 {
 
 private:

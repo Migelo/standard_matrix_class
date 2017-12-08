@@ -28,19 +28,19 @@ la_objects::LAMatrix<double> kroniker(la_objects::LAMatrix<double> &sigma_x, la_
     }
     return out;
 }
-
-la_objects::LAMatrix<double> sigma_i(la_objects::LAMatrix<double> &A, int i, int L)
+template <typename T>
+void sigma_i(la_objects::LAMatrix<T> &A,la_objects::LAMatrix<T> &out, int i, int L)
 {
-    la_objects::LAMatrix<double> id(2, 2);
+    la_objects::LAMatrix<T> id(2, 2);
     id(0, 0) = 1;
     id(0, 1) = 0;
     id(1, 0) = 0;
     id(1, 1) = 1;
 
-    la_objects::LAMatrix<double> out = id;
+    out = id;
     if (i + 1 < L)
     {
-        for (unsigned int j = 0; j < L - i - 2; j++)
+        for (int j = 0; j < L - i - 2; j++)
         {
             out = kroniker(id, out);
         }
@@ -54,12 +54,12 @@ la_objects::LAMatrix<double> sigma_i(la_objects::LAMatrix<double> &A, int i, int
         }
 
     }
-    return out;
 }
 
-la_objects::LAMatrix<double> sum(la_objects::LAMatrix<double> &A, la_objects::LAMatrix<double> &B)
+template <typename T>
+void sum(la_objects::LAMatrix<T> &A, la_objects::LAMatrix<T> &B, la_objects::LAMatrix<T> &out)
 {
-    la_objects::LAMatrix<double> out(A.n_rows(), A.n_cols());
+    out.resize(A.n_rows(), A.n_cols());
     for (unsigned int r = 0; r < A.n_rows(); r++)
     {
         for (unsigned int c = 0; c < A.n_cols(); c++)
@@ -67,7 +67,6 @@ la_objects::LAMatrix<double> sum(la_objects::LAMatrix<double> &A, la_objects::LA
             out(r, c) = A(r, c) + B(r, c);
         }
     }
-    return out;
 }
 
 int main(int /*argc*/, char **/*argv[]*/)
@@ -125,54 +124,47 @@ int main(int /*argc*/, char **/*argv[]*/)
 
 //    C = A * B;
 
-//    std::cout << "2*A*B:" << std::endl << C << std::endl;
+//    std::cout << "A*B:" << std::endl << C << std::endl;
 
 
-    std::cout << sigma_x << std::endl;
-    std::cout << sigma_z << std::endl;
+//    std::cout << sigma_x << std::endl;
+//    std::cout << sigma_z << std::endl;
 
 //    std::cout << kroniker(id, id);
 
 //    out = sigma_i(sigma_z, 2, 3) * sigma_i(sigma_z, 3, 3);
 
 
-    int L = 3;
+    int L = 6;
     int dim = pow(2, L);
     la_objects::LAMatrix<double> H(dim, dim);
     la_objects::LAMatrix<double> H_temp(dim, dim);
-    la_objects::LAMatrix<double> H_z(dim, dim);
-//    A = sigma_i(sigma_z, 0, L);
-//    B = sigma_i(sigma_z, 1, L);
-//    H1 = A*B;
-//    A = sigma_i(sigma_z, 1, L);
-//    B = sigma_i(sigma_z, 2, L);
-//    H2 = A*B;
-
-//    H2 = sum(H, H1);
+    la_objects::LAMatrix<double> H_z(dim, dim), H1, H2;
 
 
-    for (unsigned int i = 0; i < L; i++)
+    for (int i = 0; i < L; i++)
     {
-        H_temp = sigma_i(sigma_z, i, L) * sigma_i(sigma_z, i + 1, L);
-        H = sum(H, H_temp);
+        sigma_i(sigma_z, H1, i, L);
+        sigma_i(sigma_z, H2, i + 1, L);
+        H_temp = H1 * H2;
+        sum(H, H_temp, H);
     }
-    for (unsigned int i = 0; i < L; i++)
+    for (int i = 0; i < L; i++)
     {
-        H_temp = sigma_i(sigma_x, i, L);
-        H_z = sum(H_z, H_temp);
+        sigma_i(sigma_x, H_temp, i, L);
+        sum(H_z, H_temp, H_z);
     }
     H *= -1.0;
-    H_z *= -1.0;
-    H = sum(H, H_z);
-    std::cout << H << std::endl;
+    H_z *= -.3;
+    sum(H, H_z, H);
+    std::cout << "H:" << std::endl << H << std::endl;
     la_objects::LAMatrix<double> U;
     la_objects::LAMatrix<double> S;
     la_objects::LAMatrix<double> Vt;
 
-    la_operations::svd(H, U, S, Vt);
-    std::cout << S;
-
-
+    la_operations::Eigen(H, U);
+    std::cout << "Eigenvalues:" << std::endl;
+    std::cout << U;
     return 0;
 }
 
