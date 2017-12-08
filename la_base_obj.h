@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <vector>
 #include <la_wrapper.h>
+#include <complex>
 
 namespace la_objects
 {

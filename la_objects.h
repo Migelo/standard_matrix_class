@@ -17,7 +17,7 @@ template <typename Type>
 void contract(const la_objects::LAMatrix<Type>& _larg, const la_objects::LAMatrix<Type>& _rarg, la_objects::LAMatrix<Type>& _dest);
 
 template <typename Type>
-void evd(const la_objects::LAMatrix<Type>& _arg, la_objects::LAMatrix<Type>& _out);
+void svd(la_objects::LAMatrix<Type>& _arg, la_objects::LAMatrix<Type>& _out);
 
 } // END NAMESPACE la_operations
 
@@ -59,7 +59,11 @@ public:
     friend void la_operations::contract(const LAMatrix<Type>& _larg, const LAMatrix<Type>& _rarg, LAMatrix<Type>& _dest);
 
     template <typename Type>
-    friend void la_operations::evd(const LAMatrix<Type>& _arg, LAMatrix<Type>& _out);
+    friend void la_operations::svd(la_objects::LAMatrix<Type>& _arg, la_objects::LAMatrix<Type>& _U, la_objects::LAMatrix<Type>& _S, la_objects::LAMatrix<Type>& _Vt);
+
+//    template <typename Type>
+//    friend void la_operations::kronicker_product(la_objects::LAMatrix<Type>& _larg, la_objects::LAMatrix<Type>& _rarg, la_objects::LAMatrix<Type>& _out);
+
 };
 
 } // END NAMESPACE la_objects

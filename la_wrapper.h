@@ -1,11 +1,10 @@
 #ifndef LA_WRAPPER
 #define LA_WRAPPER
 
-#include <gsl/gsl_cblas.h>
-//#include <cblas.h>
-#include <lapacke.h>
-//#include <clapack.h>
-//#include <cblas.h>
+//#include <gsl/gsl_cblas.h>
+#include <cblas.h>
+#include <complex>
+#include <lapack_header.h>
 
 #include <complex>
 
@@ -212,38 +211,61 @@ static void gemm(char transa, char transb, int m, int n, int k, const std::compl
                 reinterpret_cast<const double*>(&beta),
                 reinterpret_cast<double*>(C), ldc);
 }
+} // END NAMESPACE blas_wrapper
 
-
-static void evd(int m, int n, const float * A, float * out, int lda)
+namespace lapack_wrapper
 {
-    blas_wrapper::copy(m*n, A, 1, out, 1);
 
-    LAPACKE_ssyev(2, 'N', 'L', 2, out, lda, 0);
+static void svd(char * JOBU, char * JOBVT, const LAPACK_INT * M, const LAPACK_INT * N, float * A, const LAPACK_INT * LDA, float * S, float * U, const LAPACK_INT * LDU, float * VT, const LAPACK_INT *  LDVT, float * WORK, LAPACK_INT * LWORK, LAPACK_INT * INFO)
+{
+    sgesvd_(JOBU, JOBVT, M, N, A, LDA, S, U, LDU, VT, LDVT, WORK, LWORK, INFO);
 }
 
 
-static void evd(int m, int n, const double * A, double * out, int lda)
+static void svd(char * JOBU, char * JOBVT, const LAPACK_INT * M, const LAPACK_INT * N, double * A, const LAPACK_INT * LDA, double * S, double * U, const LAPACK_INT * LDU, double * VT, const LAPACK_INT *  LDVT, double * WORK, LAPACK_INT * LWORK, LAPACK_INT * INFO)
 {
-    blas_wrapper::copy(m*n, A, 1, out, 1);
-
-    LAPACKE_dsyev(2, 'N', 'L', 2, out, lda, 0);
+    dgesvd_(JOBU, JOBVT, M, N, A, LDA, S, U, LDU, VT, LDVT, WORK, LWORK, INFO);
 }
 
 
-static void evd(int m, int n, const std::complex<float> * A, std::complex<float> * out, int lda)
-{
-    blas_wrapper::copy(m*n, A, 1, out, 1);
-
-    LAPACKE_cheev(2, 'N', 'L', 2, reinterpret_cast<lapack_complex_float*>(out), lda, 0);
-}
 
 
-static void evd(int m, int n, const std::complex<double> * A, std::complex<double> * out, int lda)
-{
-    blas_wrapper::copy(m*n, A, 1, out, 1);
-    LAPACKE_zheev(m, 'N', 'L', 2, reinterpret_cast<lapack_complex_double*>(out), lda, 0);
+//static void kronicker_product(double &_larg, double &_rarg, double &_out)
+//{
+//    _out.resize(_larg.n_rows() * _rarg.n_rows(), _larg.n_cols() * _rarg.n_cols());
+//    la_objects::LAMatrix<double> WORK(_rarg.n_rows(), _rarg.n_cols());
 
-}
+//    for (unsigned int r = 0; r < _out.n_rows(); r++)
+//    {
+//        for (unsigned int c = 0; c < _out.n_cols(); c++)
+//        {
+//            scale(_larg(r, c), WORK);
+//            for (unsigned int i; i < WORK.n_rows(); i++)
+//            {
+//                for (unsigned j; j < WORK.n_cols(); j++)
+//                {
+//                    _out(r * _larg.n_rows() + i, c * _larg.n_cols() + j) = WORK(i, j);
+//                }
+//            }
+
+
+//        }
+//    }
+//}
+
+
+//static void evd(int m, int n, const std::complex<float> * A, std::complex<float> * out, int lda)
+//{
+//    blas_wrapper::copy(m*n, A, 1, out, 1);
+//    LAPACKE_cheev(2, 'N', 'L', 2, reinterpret_cast<lapack_complex_float*>(out), lda, 0);
+//}
+
+
+//static void evd(int m, int n, const std::complex<double> * A, std::complex<double> * out, int lda)
+//{
+//    blas_wrapper::copy(m*n, A, 1, out, 1);
+//    LAPACKE_zheev(m, 'N', 'L', 2, reinterpret_cast<lapack_complex_double*>(out), lda, 0);
+//}
 
 } // END NAMESPACE blas_wrapper
 
